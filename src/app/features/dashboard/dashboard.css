@@ -1,0 +1,38 @@
+/* Blurred backdrop overlay */
+.ch-backdrop {
+  background: rgba(2, 8, 23, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: backdropFadeIn 0.2s ease-out;
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Modal pop-in animation */
+.ch-modal {
+  animation: modalSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Teaser cards hover lift */
+.ch-teaser-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.ch-teaser-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.4);
+}

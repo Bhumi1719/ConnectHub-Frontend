@@ -1,0 +1,97 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+    (click)="close.emit()">
+    <div class="relative bg-slate-900 border border-white/10 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col"
+        (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-white/[0.06] shrink-0">
+            <div class="flex items-center gap-2.5">
+                <div
+                    class="w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-500/25 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <h3 class="text-white font-semibold text-sm">Media Gallery</h3>
+                <span class="text-slate-500 text-xs">({{ images().length }})</span>
+            </div>
+            <button (click)="close.emit()"
+                class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 overflow-y-auto p-5 scrollbar-thin scrollbar-thumb-white/10">
+
+            <!-- Loading -->
+            <div *ngIf="loading" class="flex justify-center py-16">
+                <svg class="animate-spin w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+            </div>
+
+            <!-- Empty -->
+            <div *ngIf="!loading && images().length === 0"
+                class="flex flex-col items-center justify-center py-16 text-center">
+                <div class="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mb-3">
+                    <svg class="w-7 h-7 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <p class="text-slate-400 text-sm">No images shared yet</p>
+            </div>
+
+            <!-- Images list -->
+            <div *ngIf="!loading && images().length > 0" class="space-y-2">
+                <div *ngFor="let img of images()"
+                    class="flex items-center gap-3 bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2.5 hover:bg-white/[0.07] transition-all cursor-pointer group"
+                    (click)="openLightbox(img)">
+
+                    <!-- Thumbnail -->
+                    <div class="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/10 bg-white/5">
+                        <img [src]="img.thumbnailUrl || img.url" [alt]="getDisplayName(img)" loading="lazy"
+                            class="w-full h-full object-cover" />
+                    </div>
+
+                    <!-- Name -->
+                    <p class="flex-1 text-white text-sm truncate">{{ getDisplayName(img) }}</p>
+
+                    <!-- Open icon -->
+                    <svg class="w-4 h-4 text-slate-600 group-hover:text-slate-300 transition-colors shrink-0"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lightbox -->
+<div *ngIf="lightboxUrl"
+    class="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm"
+    (click)="closeLightbox()">
+
+    <!-- Top bar -->
+    <div class="absolute top-0 left-0 right-0 flex items-center justify-between px-5 py-3 bg-black/40"
+        (click)="$event.stopPropagation()">
+        <p class="text-white text-sm font-medium truncate max-w-lg">{{ lightboxName }}</p>
+        <button (click)="closeLightbox()"
+            class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Image -->
+    <img [src]="lightboxUrl" [alt]="lightboxName || ''" (click)="$event.stopPropagation()"
+        class="max-w-[90vw] max-h-[85vh] object-contain rounded-xl shadow-2xl" />
+</div>
