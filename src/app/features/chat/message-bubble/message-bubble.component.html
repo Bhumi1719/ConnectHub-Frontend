@@ -1,0 +1,138 @@
+<div class="flex items-end gap-2 group px-1 py-0.5" [class.flex-row-reverse]="isOwn">
+
+    <!-- Avatar (other user only) -->
+    <div *ngIf="!isOwn" class="shrink-0 mb-1">
+        <img *ngIf="message.senderAvatarUrl" [src]="message.senderAvatarUrl"
+            class="w-7 h-7 rounded-full object-cover border border-white/10" />
+        <div *ngIf="!message.senderAvatarUrl"
+            class="w-7 h-7 rounded-full bg-slate-700 border border-white/10 flex items-center justify-center text-[10px] font-bold text-slate-300">
+            {{ getInitial(displayName) }}
+        </div>
+    </div>
+
+    <!-- Bubble -->
+    <div class="relative max-w-[70%]" [class.items-end]="isOwn">
+
+        <!-- Sender name (others only) -->
+        <p *ngIf="!isOwn && !isDm" class="text-[10px] text-slate-500 mb-1 ml-1">{{ displayName }}</p>
+        <!-- Context menu trigger -->
+        <div class="relative">
+            <!-- Hover menu button -->
+            <div class="absolute top-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                [class.right-full]="isOwn" [class.mr-1]="isOwn" [class.left-full]="!isOwn" [class.ml-1]="!isOwn">
+                <button *ngIf="!message.isDeleted && (canEdit || canDelete)" (click)="showMenu = !showMenu"
+                    class="w-6 h-6 rounded-lg bg-slate-800 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="5" r="1.5" />
+                        <circle cx="12" cy="12" r="1.5" />
+                        <circle cx="12" cy="19" r="1.5" />
+                    </svg>
+                </button>
+
+                <!-- Context menu dropdown -->
+                <div *ngIf="showMenu"
+                    class="absolute bg-slate-800 border border-white/10 rounded-xl shadow-2xl py-1 w-32 z-20"
+                    [class.right-0]="isOwn" [class.left-0]="!isOwn">
+                    <button *ngIf="canEdit" (click)="startEdit()"
+                        class="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-white/5 hover:text-white transition-colors text-left">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit
+                    </button>
+                    <button *ngIf="canDelete" (click)="onDelete()"
+                        class="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 transition-colors text-left">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete
+                    </button>
+                </div>
+            </div>
+
+            <!-- Deleted message -->
+            <div *ngIf="message.isDeleted" class="px-4 py-2.5 rounded-2xl border border-white/[0.06] bg-white/[0.03]">
+                <p class="text-slate-600 text-sm italic">This message was deleted</p>
+            </div>
+
+            <!-- Edit mode -->
+            <div *ngIf="!message.isDeleted && editing" class="flex gap-2 items-center">
+                <input [(ngModel)]="editContent" (keyup.enter)="submitEdit()" (keyup.escape)="cancelEdit()"
+                    class="bg-slate-800 border border-blue-500/50 text-white text-sm rounded-xl px-3 py-2 outline-none focus:ring-1 focus:ring-blue-500 min-w-48" />
+                <button (click)="submitEdit()" class="text-blue-400 hover:text-blue-300 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                </button>
+                <button (click)="cancelEdit()" class="text-slate-500 hover:text-slate-300 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Normal message -->
+            <div *ngIf="!message.isDeleted && !editing" class="rounded-2xl text-sm leading-relaxed" [ngClass]="isOwn
+            ? 'bg-blue-600 text-white rounded-br-sm'
+            : 'bg-white/[0.07] text-slate-100 border border-white/[0.06] rounded-bl-sm'">
+
+                <!-- IMAGE -->
+                <div *ngIf="message.type === 'IMAGE'" class="p-1">
+                    <app-image-message [thumbnailUrl]="message.mediaUrl || ''" [fullUrl]="message.mediaUrl || ''"
+                        [filename]="message.content">
+                    </app-image-message>
+                </div>
+
+                <!-- FILE -->
+                <div *ngIf="message.type === 'FILE'" class="px-1 py-1">
+                    <app-file-message [url]="message.mediaUrl || ''" [filename]="message.content"
+                        [mimeType]="message.mimeType || ''" [sizeKb]="message.sizeKb || 0" [isOwn]="isOwn">
+                    </app-file-message>
+                </div>
+
+                <!-- TEXT -->
+                <div *ngIf="message.type === 'TEXT' || !message.type" class="px-4 py-2.5">
+                    {{ message.content }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Timestamp + status -->
+        <div class="flex items-center gap-1 mt-1 px-1" [class.justify-end]="isOwn">
+            <span class="text-[10px] text-slate-600">
+                {{ message.createdAt | date:'h:mm a' }}
+            </span>
+            <span *ngIf="message.isEdited && !message.isDeleted" class="text-[10px] text-slate-600">(edited)</span>
+
+            <!-- Delivery status (own messages only) -->
+            <span *ngIf="isOwn && !message.isDeleted" class="ml-0.5">
+                <!-- SENT: single tick -->
+                <svg *ngIf="message.status === 'SENT'" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
+                <!-- DELIVERED: double tick grey -->
+                <span *ngIf="message.status === 'DELIVERED'" class="flex">
+                    <svg class="w-3 h-3 text-slate-500 -mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                </span>
+                <!-- READ: double tick blue -->
+                <span *ngIf="message.status === 'READ'" class="flex">
+                    <svg class="w-3 h-3 text-blue-400 -mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <svg class="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                </span>
+            </span>
+        </div>
+    </div>
+</div>

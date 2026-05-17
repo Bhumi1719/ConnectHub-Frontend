@@ -1,0 +1,391 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+
+    <!-- Decorative blobs -->
+    <div
+        class="fixed top-0 left-0 w-[500px] h-[500px] bg-blue-600 opacity-[0.07] rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+    </div>
+    <div
+        class="fixed bottom-0 right-0 w-[500px] h-[500px] bg-cyan-500 opacity-[0.07] rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none">
+    </div>
+
+    <!-- Navbar -->
+    <nav
+        class="relative border-b border-white/10 bg-white/5 backdrop-blur-xl px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/30">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2v-1M7 8H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l4-4h4a2 2 0 002-2V8a2 2 0 00-2-2H7z" />
+                </svg>
+            </div>
+            <span class="text-white font-bold text-lg tracking-tight">ConnectHub</span>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <div
+                    class="w-8 h-8 rounded-full bg-blue-500/30 border border-blue-400/30 flex items-center justify-center text-blue-300 text-sm font-semibold">
+                    {{ getInitial(authStore.currentUser()?.username || '') }}
+                </div>
+                <span class="text-slate-300 text-sm hidden sm:block">{{ authStore.currentUser()?.username }}</span>
+            </div>
+            <button (click)="logout()"
+                class="text-slate-400 hover:text-white text-sm px-3 py-1.5 rounded-lg hover:bg-white/10 transition-all duration-200">
+                Sign out
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 py-10">
+
+        <!-- Welcome heading -->
+        <div class="mb-10">
+            <p class="text-blue-400 text-sm font-medium mb-1 tracking-widest uppercase">Dashboard</p>
+            <h1 class="text-3xl sm:text-4xl font-bold text-white">
+                Welcome back, <span class="text-blue-400">{{ authStore.currentUser()?.username }}</span>!
+            </h1>
+            <p class="text-slate-400 mt-2">What would you like to do today?</p>
+        </div>
+
+        <!-- Three teaser cards -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+
+            <!-- ─── TEASER 1: Create Room ─── -->
+            <div
+                class="ch-teaser-card group bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl flex flex-col items-start gap-5 hover:border-blue-500/40 hover:bg-white/[0.07] transition-all duration-300">
+                <div
+                    class="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center shadow-lg shadow-blue-600/10 group-hover:shadow-blue-600/20 transition-shadow duration-300">
+                    <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-white font-bold text-xl mb-2">Create Room</h2>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Start a brand-new group chat. Give it a name, an optional description, and invite your team to
+                        collaborate in real-time.
+                    </p>
+                </div>
+                <div class="flex items-center justify-between w-full pt-2 border-t border-white/5">
+                    <span class="text-slate-500 text-xs">Group chats · Instant setup</span>
+                    <button (click)="openModal('create')"
+                        class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5 active:translate-y-0">
+                        Open
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ─── TEASER 2: Join Room ─── -->
+            <div
+                class="ch-teaser-card group bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl flex flex-col items-start gap-5 hover:border-cyan-500/40 hover:bg-white/[0.07] transition-all duration-300">
+                <div
+                    class="w-14 h-14 rounded-2xl bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center shadow-lg shadow-cyan-600/10 group-hover:shadow-cyan-600/20 transition-shadow duration-300">
+                    <svg class="w-7 h-7 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-white font-bold text-xl mb-2">Join a Room</h2>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Browse all available group chats. Send a join request to any room and start connecting with
+                        others right away.
+                    </p>
+                </div>
+                <div class="flex items-center justify-between w-full pt-2 border-t border-white/5">
+                    <span class="text-slate-500 text-xs">{{ rooms.length }} room{{ rooms.length !== 1 ? 's' : '' }}
+                        available</span>
+                    <button (click)="openModal('join')"
+                        class="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 shadow-lg shadow-cyan-600/30 hover:shadow-cyan-600/50 hover:-translate-y-0.5 active:translate-y-0">
+                        Browse
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ─── TEASER 3: Direct Messages ─── -->
+            <div
+                class="ch-teaser-card group bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl flex flex-col items-start gap-5 hover:border-violet-500/40 hover:bg-white/[0.07] transition-all duration-300">
+                <div
+                    class="w-14 h-14 rounded-2xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center shadow-lg shadow-violet-600/10 group-hover:shadow-violet-600/20 transition-shadow duration-300">
+                    <svg class="w-7 h-7 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-white font-bold text-xl mb-2">Direct Messages</h2>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Chat privately one-on-one with any user on the platform. Your conversations are personal and
+                        instant.
+                    </p>
+                </div>
+                <div class="flex items-center justify-between w-full pt-2 border-t border-white/5">
+                    <span class="text-slate-500 text-xs">{{ users.length }} user{{ users.length !== 1 ? 's' : '' }}
+                        online</span>
+                    <button (click)="openModal('dm')"
+                        class="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 shadow-lg shadow-violet-600/30 hover:shadow-violet-600/50 hover:-translate-y-0.5 active:translate-y-0">
+                        Message
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     MODAL BACKDROP (shared, blurred)
+══════════════════════════════════════════════════ -->
+<div *ngIf="activeModal" class="ch-backdrop fixed inset-0 z-50 flex items-center justify-center p-4"
+    (click)="onBackdropClick($event)">
+
+    <!-- ─── MODAL: Create Room ─── -->
+    <div *ngIf="activeModal === 'create'"
+        class="ch-modal w-full max-w-md bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-6"
+        (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-white font-semibold text-base">Create Room</h2>
+                    <p class="text-slate-400 text-xs">Start a new group chat</p>
+                </div>
+            </div>
+            <button (click)="closeModal()"
+                class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="space-y-3">
+            <div>
+                <label class="text-slate-400 text-xs mb-1.5 block">Room Name <span class="text-red-400">*</span></label>
+                <input [(ngModel)]="roomName" placeholder="e.g. Design Team"
+                    class="w-full bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" />
+            </div>
+            <div>
+                <label class="text-slate-400 text-xs mb-1.5 block">Description <span
+                        class="text-slate-600">(optional)</span></label>
+                <input [(ngModel)]="roomDescription" placeholder="What's this room about?"
+                    class="w-full bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" />
+            </div>
+
+            <div *ngIf="createError"
+                class="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5">
+                <svg class="w-4 h-4 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-red-400 text-xs">{{ createError }}</p>
+            </div>
+
+            <button (click)="createRoom()" [disabled]="creating || !roomName.trim()"
+                class="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 shadow-lg shadow-blue-600/20 mt-1">
+                <span *ngIf="!creating">Create Room</span>
+                <span *ngIf="creating" class="flex items-center justify-center gap-2">
+                    <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                    Creating...
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ─── MODAL: Join Room ─── -->
+    <div *ngIf="activeModal === 'join'"
+        class="ch-modal w-full max-w-md bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-6"
+        (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-5">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-xl bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-white font-semibold text-base">Join a Room</h2>
+                    <p class="text-slate-400 text-xs">Browse available group chats</p>
+                </div>
+            </div>
+            <button (click)="closeModal()"
+                class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="roomsLoading" class="flex flex-col items-center justify-center py-10 gap-3">
+            <svg class="animate-spin w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+            </svg>
+            <p class="text-slate-500 text-xs">Loading rooms...</p>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!roomsLoading && rooms.length === 0"
+            class="flex flex-col items-center justify-center py-10 text-center">
+            <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
+                <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+            </div>
+            <p class="text-slate-400 text-sm">No rooms available yet</p>
+            <p class="text-slate-600 text-xs mt-1">Create one to get started!</p>
+        </div>
+
+        <!-- Room list -->
+        <div *ngIf="!roomsLoading && rooms.length > 0"
+            class="overflow-y-auto max-h-72 space-y-2 pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            <div *ngFor="let room of rooms"
+                class="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-3.5 transition-all duration-200">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <p class="text-white text-sm font-medium truncate">{{ room.name }}</p>
+                        <p class="text-slate-500 text-xs truncate mt-0.5">{{ room.description || 'No description' }}</p>
+                        <div class="flex items-center gap-1 mt-1.5">
+                            <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span class="text-slate-500 text-xs">{{ room.memberCount }} members</span>
+                        </div>
+                    </div>
+
+                    <button *ngIf="room.isMember" (click)="enterRoom(room)"
+                        class="shrink-0 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap">
+                        Enter Space
+                    </button>
+                    <button *ngIf="!room.isMember && room.hasPendingRequest" disabled
+                        class="shrink-0 bg-white/5 text-slate-500 border border-white/10 px-3 py-1.5 rounded-lg text-xs font-medium cursor-not-allowed whitespace-nowrap">
+                        Pending...
+                    </button>
+                    <button *ngIf="!room.isMember && !room.hasPendingRequest" (click)="sendJoinRequest(room)"
+                        [disabled]="pendingRooms.has(room.roomId)"
+                        class="shrink-0 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/30 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
+                        {{ pendingRooms.has(room.roomId) ? 'Sending...' : 'Request Join' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── MODAL: Direct Messages ─── -->
+    <div *ngIf="activeModal === 'dm'"
+        class="ch-modal w-full max-w-md bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-6"
+        (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-5">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-white font-semibold text-base">Direct Messages</h2>
+                    <p class="text-slate-400 text-xs">Chat privately with anyone</p>
+                </div>
+            </div>
+            <button (click)="closeModal()"
+                class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="usersLoading" class="flex flex-col items-center justify-center py-10 gap-3">
+            <svg class="animate-spin w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+            </svg>
+            <p class="text-slate-500 text-xs">Loading users...</p>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!usersLoading && users.length === 0"
+            class="flex flex-col items-center justify-center py-10 text-center">
+            <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
+                <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            </div>
+            <p class="text-slate-400 text-sm">No other users yet</p>
+        </div>
+
+        <!-- Users list -->
+        <div *ngIf="!usersLoading && users.length > 0"
+            class="overflow-y-auto max-h-72 space-y-1.5 pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            <button *ngFor="let user of users" (click)="openDM(user)" [disabled]="dmLoading.has(user.userId)"
+                class="w-full flex items-center gap-3 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-wait border border-white/10 rounded-xl p-3 transition-all duration-200 text-left group">
+
+                <div class="relative shrink-0">
+                    <img *ngIf="user.avatarUrl" [src]="user.avatarUrl" [alt]="user.username"
+                        class="w-9 h-9 rounded-full object-cover border border-white/10" />
+                    <div *ngIf="!user.avatarUrl"
+                        class="w-9 h-9 rounded-full bg-violet-500/30 border border-violet-400/30 flex items-center justify-center text-violet-300 text-sm font-semibold">
+                        {{ getInitial(user.username) }}
+                    </div>
+                    <span
+                        class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-slate-900"></span>
+                </div>
+
+                <div class="min-w-0 flex-1">
+                    <p class="text-white text-sm font-medium truncate group-hover:text-violet-300 transition-colors">{{
+                        user.username }}</p>
+                    <p class="text-slate-500 text-xs truncate">{{ user.fullName }}</p>
+                </div>
+
+                <svg *ngIf="!dmLoading.has(user.userId)"
+                    class="w-4 h-4 text-slate-600 group-hover:text-violet-400 transition-colors shrink-0" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                <svg *ngIf="dmLoading.has(user.userId)" class="animate-spin w-4 h-4 text-violet-400 shrink-0"
+                    fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,279 @@
+<div class="flex h-full overflow-hidden"> <!-- ══════════════════════════════
+       MAIN CHAT COLUMN
+  ══════════════════════════════ -->
+    <div class="flex flex-col flex-1 min-w-0 overflow-hidden h-full"> <!-- HEADER -->
+        <header
+            class="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] bg-slate-900/80 backdrop-blur-sm shrink-0">
+
+            <div class="flex items-center gap-3">
+                <!-- Room avatar -->
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold" [ngClass]="activeRoomType === 'GROUP'
+                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                        : 'bg-violet-500/20 text-violet-300 border border-violet-500/30'">
+                    {{ getInitial(activeRoomName) }}
+                </div>
+                <div>
+                    <h2 class="text-white font-semibold text-sm">{{ activeRoomName }}</h2>
+                    <p class="text-slate-500 text-[11px]">
+                        <span *ngIf="activeRoomType === 'GROUP'">
+                            {{ members().length }} member{{ members().length !== 1 ? 's' : '' }}
+                        </span>
+                        <span *ngIf="typingUsers().length > 0" class="text-blue-400 animate-pulse ml-1">
+                            · {{ typingUsers().join(', ') }} typing...
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Header actions -->
+            <div class="flex items-center gap-1">
+                <!-- Members toggle -->
+                <button *ngIf="activeRoomType !== 'DM'" (click)="showMembers = !showMembers"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150"
+                    [ngClass]="showMembers
+                        ? 'bg-blue-600/20 text-blue-300 border border-blue-500/30'
+                        : 'text-slate-400 hover:text-white hover:bg-white/10'">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Members
+                </button>
+
+                <!-- Three-dot menu button -->
+                <button (click)="showMenu = !showMenu"
+                    class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all relative">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="5" r="1.5" />
+                        <circle cx="12" cy="12" r="1.5" />
+                        <circle cx="12" cy="19" r="1.5" />
+                    </svg>
+                    <span *ngIf="isAdmin() && pendingRequestCount() > 0"
+                        class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-slate-900"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MESSAGE LIST -->
+        <app-message-list class="flex-1 min-h-0" [messages]="messages()"
+            [currentUserId]="authStore.currentUser()?.userId || ''" [isAdmin]="isAdmin()" [hasMore]="hasMore"
+            [loading]="loadingMessages" [isDm]="activeRoomType === 'DM'" (loadMore)="loadMoreMessages()"
+            (deleteMessage)="deleteMessage($event)" (editMessage)="editMessage($event.messageId, $event.content)">
+        </app-message-list>
+
+        <!-- TYPING INDICATOR -->
+        <app-typing-indicator [typingUsers]="typingUsers()" class="shrink-0">
+        </app-typing-indicator>
+
+        <!-- INPUT -->
+        <app-message-input class="shrink-0" [roomId]="roomId" [uploaderId]="authStore.currentUser()!.userId"
+            (sendMessage)="sendMessage($event)" (typingChange)="sendTyping($event)"
+            (mediaSent)="sendMediaMessage($event)">
+        </app-message-input>
+    </div>
+
+    <!-- ══════════════════════════════
+       MEMBERS SLIDE PANEL
+  ══════════════════════════════ -->
+    <aside
+        class="absolute right-0 top-0 h-full bg-slate-900 border-l border-white/[0.06] transition-all duration-300 overflow-hidden z-20"
+        [ngClass]="showMembers ? 'w-72' : 'w-0'">
+
+        <div class="w-72 h-full flex flex-col">
+            <div class="flex items-center justify-between px-4 py-4 border-b border-white/[0.06]">
+                <h3 class="text-white font-semibold text-sm">Members
+                    <span class="text-slate-500 font-normal">({{ members().length }})</span>
+                </h3>
+                <button (click)="showMembers = false"
+                    class="w-6 h-6 rounded-lg flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div *ngIf="loadingMembers" class="flex justify-center py-8">
+                <svg class="animate-spin w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+            </div>
+
+            <div *ngIf="!loadingMembers" class="flex-1 overflow-y-auto px-3 py-2 space-y-1">
+                <!-- Admins -->
+                <p class="text-slate-600 text-[10px] uppercase tracking-widest px-2 pt-2 pb-1">Admins</p>
+                <ng-container *ngFor="let member of members()">
+                    <div *ngIf="member.role === 'ADMIN'"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all">
+                        <div class="relative shrink-0">
+                            <img *ngIf="member.avatarUrl" [src]="member.avatarUrl"
+                                class="w-8 h-8 rounded-full object-cover border border-white/10" />
+                            <div *ngIf="!member.avatarUrl"
+                                class="w-8 h-8 rounded-full bg-blue-500/30 border border-blue-400/20 flex items-center justify-center text-blue-300 text-xs font-bold">
+                                {{ getInitial(member.username) }}
+                            </div>
+                            <span
+                                class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-slate-900"
+                                [ngClass]="presenceService.getStatusColor(member.userId)"></span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-white text-xs font-medium truncate">{{ member.username }}</p>
+                            <p class="text-slate-500 text-[10px] truncate">{{ member.email }}</p>
+                        </div>
+                        <span
+                            class="text-[9px] font-bold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 rounded-md">ADMIN</span>
+                    </div>
+                </ng-container>
+
+                <!-- Members -->
+                <p class="text-slate-600 text-[10px] uppercase tracking-widest px-2 pt-3 pb-1">Members</p>
+                <ng-container *ngFor="let member of members()">
+                    <div *ngIf="member.role !== 'ADMIN'"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all">
+                        <div class="relative shrink-0">
+                            <img *ngIf="member.avatarUrl" [src]="member.avatarUrl"
+                                class="w-8 h-8 rounded-full object-cover border border-white/10" />
+                            <div *ngIf="!member.avatarUrl"
+                                class="w-8 h-8 rounded-full bg-slate-700 border border-white/10 flex items-center justify-center text-slate-300 text-xs font-bold">
+                                {{ getInitial(member.username) }}
+                            </div>
+                            <span
+                                class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-slate-900"
+                                [ngClass]="presenceService.getStatusColor(member.userId)"></span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-white text-xs font-medium truncate">{{ member.username }}</p>
+                            <p class="text-slate-500 text-[10px] truncate">{{ member.email }}</p>
+                        </div>
+                    </div>
+                </ng-container>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<!-- ══════════════════════════════
+     DROPDOWN MENU (fixed — outside overflow context)
+══════════════════════════════ -->
+
+<!-- Click-outside backdrop -->
+<div *ngIf="showMenu" class="fixed inset-0 z-[90]" (click)="showMenu = false">
+</div>
+
+<!-- Dropdown panel -->
+<div *ngIf="showMenu"
+    class="fixed top-14 right-4 w-52 bg-slate-800 border border-white/10 rounded-xl shadow-2xl py-1 z-[100]">
+
+    <ng-container *ngIf="isAdmin()">
+
+        <!-- Join Requests (GROUP only) -->
+        <button *ngIf="activeRoomType === 'GROUP'" (click)="showMenu = false; showJoinRequests = true"
+            class="w-full flex items-center justify-between px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors text-left">
+            <span class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                Join Requests
+            </span>
+            <span *ngIf="pendingRequestCount() > 0"
+                class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-5 text-center">
+                {{ pendingRequestCount() }}
+            </span>
+        </button>
+
+        <!-- Add Members -->
+        <button *ngIf="activeRoomType === 'GROUP'" (click)="showMenu = false; showAddMembers = true"
+            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors text-left">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            Add Members
+        </button>
+
+        <!-- Remove Members (GROUP only) -->
+        <button *ngIf="activeRoomType === 'GROUP'" (click)="showMenu = false; showRemoveMembers = true"
+            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors text-left">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
+            </svg>
+            Remove Members
+        </button>
+
+        <!-- Media Gallery -->
+        <!-- <button (click)="showMenu = false; showMediaGallery = true"
+            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors text-left">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Media Gallery
+        </button> -->
+
+        <!-- Room Settings -->
+        <button (click)="showMenu = false; showRoomSettings = true"
+            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors text-left">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Room Settings
+        </button>
+
+        <div class="h-px bg-white/[0.06] my-1"></div>
+
+        <!-- Delete Room -->
+        <button (click)="showMenu = false; showDeleteConfirm = true"
+            class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors text-left">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete Room
+        </button>
+    </ng-container>
+
+    <!-- Leave Room (always visible) -->
+    <button (click)="showMenu = false; leaveRoom()"
+        class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors text-left">
+        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        Leave Room
+    </button>
+</div>
+
+<!-- ══════════════════════════════
+     MODALS
+══════════════════════════════ -->
+
+<app-confirm-modal *ngIf="showDeleteConfirm" title="Delete Room?"
+    [message]="'Permanently delete ' + activeRoomName + '? All messages will be lost and this cannot be undone.'"
+    confirmLabel="Delete Room" [danger]="true" (confirmed)="$event ? deleteRoom() : (showDeleteConfirm = false)">
+</app-confirm-modal>
+
+<app-join-requests *ngIf="showJoinRequests" [roomId]="roomId" (close)="showJoinRequests = false"
+    (memberAdded)="onMemberAdded($event)">
+</app-join-requests>
+
+<app-add-members-modal *ngIf="showAddMembers" [roomId]="roomId" [existingMemberIds]="members().map(m => m.userId)"
+    (close)="showAddMembers = false" (memberAdded)="onMemberAdded($event)">
+</app-add-members-modal>
+
+<app-remove-members-modal *ngIf="showRemoveMembers" [roomId]="roomId"
+    [currentUserId]="authStore.currentUser()?.userId || ''" [membersList]="members()"
+    (close)="showRemoveMembers = false" (membersChanged)="onMembersChanged($event)">
+</app-remove-members-modal>
+
+<app-media-gallery *ngIf="showMediaGallery" [roomId]="roomId" (close)="showMediaGallery = false">
+</app-media-gallery>
+
+<app-room-settings-panel *ngIf="showRoomSettings" [roomId]="roomId" [room]="roomStore.activeRoom()!"
+    (close)="showRoomSettings = false">
+</app-room-settings-panel>
