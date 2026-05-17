@@ -1,0 +1,90 @@
+<!-- Click-outside backdrop -->
+<div class="fixed inset-0 z-40" (click)="closePanel.emit()"></div>
+
+<div
+    class="absolute right-0 top-11 w-80 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+        <div class="flex items-center gap-2">
+            <h3 class="text-white font-semibold text-sm">Notifications</h3>
+            <span *ngIf="notificationStore.unreadCount() > 0"
+                class="bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                {{ notificationStore.unreadCount() }}
+            </span>
+        </div>
+        <button *ngIf="notificationStore.unreadCount() > 0" (click)="markAllRead()"
+            class="text-blue-400 hover:text-blue-300 text-xs font-medium transition-colors">
+            Mark all read
+        </button>
+    </div>
+
+    <!-- List -->
+    <div class="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
+
+        <!-- Empty -->
+        <div *ngIf="notificationStore.latestNotifications().length === 0"
+            class="flex flex-col items-center justify-center py-12 text-center">
+            <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
+                <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+            </div>
+            <p class="text-slate-500 text-xs">No notifications yet</p>
+        </div>
+
+        <!-- Items -->
+        <button *ngFor="let n of notificationStore.latestNotifications()" (click)="onNotificationClick(n)"
+            class="w-full flex items-start gap-3 px-4 py-3.5 text-left transition-all hover:bg-white/[0.04] border-b border-white/[0.04] last:border-0"
+            [ngClass]="!n.isRead ? 'bg-blue-500/5' : ''">
+
+            <!-- Icon bubble -->
+            <div class="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center mt-0.5" [ngClass]="{
+          'bg-blue-500/15 border border-blue-500/25': n.type === 'MESSAGE' || n.type === 'MENTION',
+          'bg-amber-500/15 border border-amber-500/25': n.type === 'JOIN_REQUEST',
+          'bg-violet-500/15 border border-violet-500/25': n.type === 'ROOM_INVITE',
+          'bg-slate-700/50 border border-white/10': n.type === 'SYSTEM'
+        }">
+                <!-- MESSAGE / MENTION -->
+                <svg *ngIf="n.type === 'MESSAGE'" class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+                <svg *ngIf="n.type === 'MENTION'" class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                </svg>
+                <svg *ngIf="n.type === 'JOIN_REQUEST'" class="w-3.5 h-3.5 text-amber-400" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                <svg *ngIf="n.type === 'ROOM_INVITE'" class="w-3.5 h-3.5 text-violet-400" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <svg *ngIf="n.type === 'SYSTEM'" class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-1">
+                    <p class="text-white text-xs font-semibold leading-tight">{{ n.title }}</p>
+                    <span class="text-slate-600 text-[10px] shrink-0 mt-0.5">{{ timeAgo(n.createdAt) }}</span>
+                </div>
+                <p class="text-slate-400 text-xs mt-0.5 leading-relaxed line-clamp-2">{{ n.message }}</p>
+            </div>
+
+            <!-- Unread dot -->
+            <div *ngIf="!n.isRead" class="shrink-0 w-1.5 h-1.5 bg-blue-400 rounded-full mt-1.5"></div>
+        </button>
+    </div>
+</div>
