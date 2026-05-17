@@ -1,0 +1,27 @@
+<div class="mt-1 flex items-center gap-3 rounded-xl border px-3 py-2.5 max-w-xs transition-all" [ngClass]="isOwn
+    ? 'bg-blue-700/40 border-blue-500/30'
+    : 'bg-white/[0.06] border-white/[0.08] hover:bg-white/[0.09]'">
+
+    <!-- Icon -->
+    <div class="w-9 h-9 rounded-lg flex items-center justify-center border shrink-0 text-xs font-bold uppercase"
+        [ngClass]="iconColor">
+        {{ fileIcon }}
+    </div>
+
+    <!-- Info -->
+    <div class="flex-1 min-w-0">
+        <p class="text-white text-xs font-medium truncate">{{ filename }}</p>
+        <p class="text-slate-500 text-[10px] mt-0.5">{{ displaySize }}</p>
+    </div>
+
+    <!-- Download -->
+    <button (click)="download()" title="Download"
+        class="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all" [ngClass]="isOwn
+      ? 'text-blue-200 hover:bg-blue-600/40'
+      : 'text-slate-400 hover:text-white hover:bg-white/10'">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+    </button>
+</div>
